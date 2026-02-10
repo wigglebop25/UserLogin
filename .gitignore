@@ -5,5 +5,5 @@ npm-debug.*
 yarn-debug.*
 yarn-error.*
 
-# Documentation/Guides
+# Guide
 guide.png
