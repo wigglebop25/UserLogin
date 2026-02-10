@@ -4,3 +4,6 @@ dist/
 npm-debug.*
 yarn-debug.*
 yarn-error.*
+
+# Documentation/Guides
+guide.png
