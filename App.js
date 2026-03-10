@@ -9,10 +9,13 @@ export default function App() {
   const [password, setPassword] = useState('');
   
   // Dashboard states
+  const [currentScreen, setCurrentScreen] = useState('list');
+  const [newName, setNewName] = useState('');
   const [inputText, setInputText] = useState('');
   const [listData, setListData] = useState([
-    { id: '1', title: 'alpha' },
-    { id: '2', title: 'bravo' },
+    { id: '1', title: 'ALPHA' },
+    { id: '2', title: 'BRAVA' },
+    { id: '3', title: 'CHARLIE' },
   ]);
 
   const handleLogin = () => {
@@ -23,54 +26,86 @@ export default function App() {
     }
   };
 
-  const handleAddItem = () => {
-    if (inputText.trim() === '') {
-      Alert.alert('Input Error', 'Please input a text before pressing the ADD button');
-      return;
+  const handleAddName = () => {
+    if (newName.trim()) {
+      setListData([...listData, { id: Date.now().toString(), title: newName }]);
+      setNewName('');
+      setCurrentScreen('list');
     }
-    const newItem = {
-      id: Math.random().toString(),
-      title: inputText,
-    };
-    setListData([...listData, newItem]);
-    setInputText('');
   };
 
   if (isLoggedIn) {
     return (
       <SafeAreaProvider>
         <SafeAreaView style={styles.dashboardContainer}>
-          <View style={styles.content}>
-            {/* Header */}
-            <View style={styles.header}>
-              <Text style={styles.headerText}>Taguiam, Jasper</Text>
-            </View>
+          {currentScreen === 'list' ? (
+            <View style={styles.content}>
+              {/* Header */}
+              <View style={styles.header}>
+                <Text style={styles.headerText}>Taguiam, Jasper</Text>
+                <TouchableOpacity onPress={() => setCurrentScreen('add')}>
+                  <Text style={styles.headerButton}>+</Text>
+                </TouchableOpacity>
+              </View>
 
-            {/* Input Section */}
-            <TextInput
-              style={styles.dashboardInput}
-              placeholder="Enter Name"
-              value={inputText}
-              onChangeText={setInputText}
-            />
-
-            <TouchableOpacity style={styles.addButton} onPress={handleAddItem}>
-              <Text style={styles.addButtonText}>+ ADD</Text>
-            </TouchableOpacity>
-
-            {/* List Section */}
-            <View style={styles.listContainer}>
-              <FlatList
-                data={listData}
-                keyExtractor={(item) => item.id}
-                renderItem={({ item }) => (
-                  <View style={styles.listItem}>
-                    <Text style={styles.listItemText}>{item.title}</Text>
-                  </View>
-                )}
+              {/* Input Section */}
+              <TextInput
+                style={styles.dashboardInput}
+                placeholder="Search..."
+                value={inputText}
+                onChangeText={setInputText}
               />
+
+              {/* List Section */}
+              <View style={styles.listContainer}>
+                <FlatList
+                  data={listData
+                    .filter(item => item.title.toLowerCase().includes(inputText.toLowerCase()))
+                    .sort((a, b) => {
+                      const aStart = a.title.toLowerCase().startsWith(inputText.toLowerCase());
+                      const bStart = b.title.toLowerCase().startsWith(inputText.toLowerCase());
+                      if (aStart && !bStart) return -1;
+                      if (!aStart && bStart) return 1;
+                      return a.title.localeCompare(b.title);
+                    })
+                  }
+                  keyExtractor={(item) => item.id}
+                  renderItem={({ item }) => (
+                    <View style={styles.listItem}>
+                      <Text style={styles.listItemText}>{item.title.toUpperCase()}</Text>
+                    </View>
+                  )}
+                />
+              </View>
             </View>
-          </View>
+          ) : (
+            <View style={styles.content}>
+              {/* Header */}
+              <View style={styles.header}>
+                <Text style={styles.headerText}>Taguiam, Jasper</Text>
+                <TouchableOpacity onPress={() => setCurrentScreen('list')}>
+                  <Text style={styles.headerButton}>&lt;</Text>
+                </TouchableOpacity>
+              </View>
+
+              <Text style={styles.label}>Enter Name</Text>
+              <TextInput
+                style={styles.dashboardInput}
+                placeholder="name"
+                value={newName}
+                onChangeText={setNewName}
+              />
+
+              <View style={styles.buttonRow}>
+                <TouchableOpacity style={styles.saveButton} onPress={handleAddName}>
+                  <Text style={styles.buttonText}>SAVE</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.cancelButton} onPress={() => setCurrentScreen('list')}>
+                  <Text style={styles.buttonText}>CANCEL</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          )}
           <StatusBar style="dark" />
         </SafeAreaView>
       </SafeAreaProvider>
@@ -123,11 +158,50 @@ const styles = StyleSheet.create({
     padding: 15,
     marginTop: 25, 
     marginBottom: 15,
-    borderRadius: 12, 
+    borderRadius: 12,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   headerText: {
     color: '#fff',
     fontSize: 22,
+    fontWeight: 'bold',
+  },
+  headerButton: {
+    color: '#fff',
+    fontSize: 24,
+    fontWeight: 'bold',
+  },
+  label: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  buttonRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 20,
+  },
+  saveButton: {
+    backgroundColor: '#3F48CC',
+    padding: 15,
+    borderRadius: 8,
+    flex: 1,
+    marginRight: 10,
+    alignItems: 'center',
+  },
+  cancelButton: {
+    backgroundColor: '#3F48CC',
+    padding: 15,
+    borderRadius: 8,
+    flex: 1,
+    marginLeft: 10,
+    alignItems: 'center',
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 18,
     fontWeight: 'bold',
   },
   dashboardInput: {
